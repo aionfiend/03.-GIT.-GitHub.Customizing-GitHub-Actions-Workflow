@@ -1,0 +1,52 @@
+name: 03.04.GitHub
+
+on:
+  push:
+    branches:
+      - main
+      - test
+      - dev
+
+jobs:
+  set-env:
+    runs-on: ubuntu-lastest
+    outputs:
+      target_env: ${{ steps.select-env.outputs.target_env }}
+    steps:
+      - name: Dymamic enviroment selection
+        id: select-env
+        run: |
+          if [ "${{ github.ref_name }}" = "main" }; then
+            echo "target_env=production" >> $GITHUB_OUTPUT
+          elif [ "${{ gitgub.ref_name }}" = test }; then
+            echo "target_env=staging" >> $GITHUB_OUTPUT
+          else
+            echo "target_env=development" >> $GITHUB_OUTPUT
+          fi
+deploy:
+  needs: set-env
+  runs-on: ubuntu-lastest
+  environment:
+    name : ${{ needs.stb-env.outputs.target_env }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploying to Server
+        run: |
+          echo "____________"
+          echo "Init deply branch: ${{ github.ref_name }}"
+          echo "Target output: ${{ needs.set-env.outputs.target_env }}"
+          echo "Start id: ${{ github.run_id }}"
+          echo "____________"
+
+      - name: Run Production Tasks
+        if: ${{ needs.set-env.outputs.target_env == 'production' }}
+        run: |
+          echo "Check security"
+
+      - name: Run Development Tasks
+        if: ${{ needs.set-env.outputs.target_env == 'development' }}
+        run: |
+          echo "Run output log"
