@@ -1,52 +1,45 @@
-name: 03.04.GitHub
+name: Environment Deployment
 
 on:
   push:
     branches:
-      - production
-      - staging
       - development
+      - staging
+      - production
 
 jobs:
   set-env:
-    runs-on: ubuntu-lastest
+    runs-on: ubuntu-latest
     outputs:
-      target_env: ${{ steps.select-env.outputs.target_env }}
+      target_env: ${{ steps.select-env.outputs.name }}
     steps:
-      - name: Dymamic enviroment selection
+      - name: Select Environment Based on Branch
         id: select-env
         run: |
-          if [ "${{ github.ref_name }}" = "main" }; then
-            echo "target_env=production" >> $GITHUB_OUTPUT
-          elif [ "${{ gitgub.ref_name }}" = test }; then
-            echo "target_env=staging" >> $GITHUB_OUTPUT
+          if [ "${{ github.ref_ref }}" = "refs/heads/production" ]; then
+            echo "name=production" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref_ref }}" = "refs/heads/staging" ]; then
+            echo "name=staging" >> $GITHUB_OUTPUT
           else
-            echo "target_env=development" >> $GITHUB_OUTPUT
+            echo "name=development" >> $GITHUB_OUTPUT
           fi
-deploy:
-  needs: set-env
-  runs-on: ubuntu-lastest
-  environment:
-    name : ${{ needs.stb-env.outputs.target_env }}
+
+  deploy:
+    needs: set-env
+    runs-on: ubuntu-latest
+    environment: ${{ needs.set-env.outputs.target_env }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploying to Server
+      - name: Simulate Build Process
         run: |
-          echo "____________"
-          echo "Init deply branch: ${{ github.ref_name }}"
-          echo "Target output: ${{ needs.set-env.outputs.target_env }}"
-          echo "Start id: ${{ github.run_id }}"
-          echo "____________"
+          echo "Собираем проект для ветки ${{ github.ref_name }}..."
+          echo "Используем настройки для среды: ${{ needs.set-env.outputs.target_env }}"
 
-      - name: Run Production Tasks
-        if: ${{ needs.set-env.outputs.target_env == 'production' }}
+      - name: Simulate Deployment
         run: |
-          echo "Check security"
-
-      - name: Run Development Tasks
-        if: ${{ needs.set-env.outputs.target_env == 'development' }}
-        run: |
-          echo "Run output log"
+          echo " Развертывание успешно запущено!"
+          echo "Проект отправлен на адрес: ${{ vars.ENV_SITE_URL }}"
+          echo "Статус: Успешно развернуто в ${{ needs.set-env.outputs.target_env }}
