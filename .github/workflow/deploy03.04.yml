@@ -44,7 +44,7 @@ deploy:
       - name: Run Production Tasks
         if: ${{ needs.set-env.outputs.target_env == 'production' }}
         run: |
-          echo "Check security"
+          echo "git Check security"
 
       - name: Run Development Tasks
         if: ${{ needs.set-env.outputs.target_env == 'development' }}
