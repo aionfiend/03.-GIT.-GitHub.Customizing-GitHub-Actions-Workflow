@@ -3,9 +3,9 @@ name: 03.04.GitHub
 on:
   push:
     branches:
-      - main
-      - test
-      - dev
+      - production
+      - staging
+      - development
 
 jobs:
   set-env:
